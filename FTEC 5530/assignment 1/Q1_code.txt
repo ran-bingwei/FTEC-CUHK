@@ -1,0 +1,72 @@
+import pandas as pd
+import numpy as np
+
+# 读取数据
+quote = pd.read_csv(' ', parse_dates=['date', 'time'])
+trade = pd.read_csv(' ', parse_dates=['date', 'time'])
+
+# 2. 计算每日数据（volume, tov, close）
+trade_ld = trade.groupby(['sym', 'date']).agg(
+    volume=('size', 'sum'),
+    tov=('size', lambda x: (x * trade.loc[x.index, 'price']).sum()),  # 成交总额
+    close=('price', 'last')  # 每日收盘价
+).reset_index()
+
+# 打印每日数据（volume, tov, close） - 部分数据
+print("计算每日数据（volume, tov, close） - 部分数据:")
+print(trade_ld.head(), "\n")
+
+# 3. 计算 ADV 和 ADTV
+q1_1 = trade_ld.groupby('sym').agg(
+    ADV=('volume', 'mean'),
+    ADTV=('tov', 'mean')
+).reset_index()
+
+# 打印计算出的 ADV 和 ADTV
+print("计算 ADV 和 ADTV - 每只股票的 ADV 和 ADTV:")
+print(q1_1.head(), "\n")  # 这里只需要打印整个表格或部分数据，每只股票仅一个值
+
+# 4. 计算每日收盘价
+trade_daily = trade.groupby(['sym', 'date']).agg(
+    close=('price', 'last')  # 每日的收盘价（最后成交价）
+).reset_index()
+
+# 5. 计算每日回报率（rtn）
+trade_daily['rtn'] = trade_daily.groupby('sym')['close'].pct_change().fillna(0)
+
+# 打印每日回报率数据
+print("计算每日回报率（rtn） - 部分数据:")
+print(trade_daily[['sym', 'date', 'close', 'rtn']].head(), "\n")
+
+# 6. 计算每只股票的平均波动率（基于每日回报率）
+volatility_daily = trade_daily.groupby('sym').agg(
+    avg_volatility=('rtn', 'std')  # 计算每日回报率的标准差作为波动率
+).reset_index()
+
+# 打印每只股票的平均波动率
+print("计算每只股票的平均波动率 - 部分数据:")
+print(volatility_daily.head(), "\n")
+
+# 7. 计算买卖差价和买卖深度
+quote['spread_bps'] = 10000 * (quote['ask'] - quote['bid']) / ((quote['ask'] + quote['bid'])/2)  # 买卖差价
+quote['qsize'] = (quote['asize'] + quote['bsize']) / 2  # 买卖深度
+
+# 打印买卖差价和买卖深度
+print("计算买卖差价和买卖深度 - 部分数据:")
+print(quote[['sym', 'date', 'time', 'spread_bps', 'qsize']].head(), "\n")
+
+# 计算平均买卖差价和买卖深度
+q1_3 = quote.groupby('sym').agg(
+    spread_bps=('spread_bps', 'mean'),
+    quote_size=('qsize', 'mean')
+).reset_index()
+
+# 打印最终结果（ADV, ADTV, 每日波动率等）
+print("最终结果（ADV, ADTV, 每日波动率等） - 部分数据:")
+q1 = pd.merge(q1_1, volatility_daily, on='sym', how='left')  # 使用每日波动率
+q1 = pd.merge(q1, q1_3, on='sym', how='left')
+print(q1.head(), "\n")
+
+# 保存结果
+q1.to_csv(' ', index=False)
+print("\n数据已保存到：")
