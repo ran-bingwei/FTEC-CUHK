@@ -1,1 +1,10 @@
-
+Overall, this course enables you to learn how to analyze stocks or cryptocurrencies using q language and make trading decisions.
+However, q is not compulsory
+For the fraction composition:
+      1. 2 or 3 clear assignments (The pdf document explains how to do it and what result is to be obtained)
+      2. 1 free play assignment (a stock analysis assignment)
+      3. Team project (about model training to trade cryptocurrency)
+      above are homeworks (q is suggested, but it is not compulsory, python is ok)
+      4. two times quiz by computer
+      5. pre for the team work
+      what' more? NO ATTENDENCE REQUIERMENT！！！
