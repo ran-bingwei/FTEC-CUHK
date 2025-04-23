@@ -1,0 +1,7 @@
+ requirement: submit a Python script to run 
+ suggestion: 
+       1. getting data set
+       2. features engineering
+       3. model training 
+       4. choosing one best
+       5. uploading your script
